@@ -5,21 +5,40 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
-    // Temporary: Skip authentication and go directly to dashboard
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 500)
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (authError) {
+        throw authError
+      }
+
+      if (data.user) {
+        // Redirect to dashboard
+        router.push('/dashboard')
+      }
+    } catch (error: any) {
+      console.error('Login error:', error)
+      setError(error.message || 'An error occurred during login')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -35,9 +54,11 @@ export default function LoginPage() {
         </div>
 
         <div className="rounded-lg border bg-white p-8 shadow-sm">
-          <div className="mb-4 rounded-md bg-blue-50 p-4 text-sm text-blue-800">
-            Authentication temporarily disabled for testing. Click "Sign in" to access the dashboard.
-          </div>
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleLogin} className="space-y-6">
 
             <div>
