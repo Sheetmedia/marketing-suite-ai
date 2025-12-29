@@ -5,21 +5,46 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
-    // Temporary: Skip authentication and go directly to dashboard
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 500)
+    try {
+      // Kiểm tra kết nối Supabase
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        throw new Error('Supabase chưa được cấu hình. Vui lòng kiểm tra file .env.local')
+      }
+
+      // Đăng nhập với Supabase
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (authError) {
+        throw authError
+      }
+
+      if (data.session) {
+        router.push('/dashboard')
+        router.refresh()
+      }
+    } catch (err: any) {
+      console.error('Login error:', err)
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -35,11 +60,13 @@ export default function LoginPage() {
         </div>
 
         <div className="rounded-lg border bg-white p-8 shadow-sm">
-          <div className="mb-4 rounded-md bg-blue-50 p-4 text-sm text-blue-800">
-            Authentication temporarily disabled for testing. Click "Sign in" to access the dashboard.
-          </div>
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800">
+              {error}
+            </div>
+          )}
+          
           <form onSubmit={handleLogin} className="space-y-6">
-
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
