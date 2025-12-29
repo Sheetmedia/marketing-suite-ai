@@ -10,7 +10,7 @@ export default function HomePage() {
         <nav className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-8 w-8 text-blue-600" />
-            <h1 className="text-2xl font-bold">Shakes Digital Marketing Suite</h1>
+            <h1 className="text-2xl font-bold">AI Digital Marketing Suite</h1>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/login">
@@ -124,7 +124,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t bg-gray-50 py-12">
         <div className="container mx-auto px-4 text-center text-gray-600">
-          <p>&copy; 2024 Shakes Digital Marketing Suite. All rights reserved.</p>
+          <p>&copy; 2024 AI Digital Marketing Suite. All rights reserved.</p>
         </div>
       </footer>
     </div>
