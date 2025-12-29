@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -12,15 +13,54 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
-    // Temporary: Skip authentication and go directly to dashboard
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 500)
+    try {
+      // Sign up with Supabase Auth (skip email confirmation for development)
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
+      })
+
+      if (authError) {
+        throw authError
+      }
+
+      if (data.user) {
+        // Create profile in the profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            email: email,
+            full_name: fullName,
+          })
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError)
+          // Don't throw here as the user is already created
+        }
+
+        // Redirect to dashboard
+        router.push('/dashboard')
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error)
+      setError(error.message || 'An error occurred during signup')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
