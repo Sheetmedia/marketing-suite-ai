@@ -53,7 +53,7 @@ export default function LoginPage() {
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <Sparkles className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold">Shakes Marketing Suite</span>
+            <span className="text-2xl font-bold">AI Marketing Suite</span>
           </Link>
           <h2 className="mt-6 text-3xl font-bold">Welcome back</h2>
           <p className="mt-2 text-gray-600">Sign in to your account</p>
